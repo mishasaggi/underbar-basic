@@ -84,23 +84,22 @@
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
 
-    var result_array = [];
+    var result = [];
+    _.each(collection, function(item){
+      if (test(item)) {
+        result.push((item));
+      }
+    });
+    return result;
+
+ /* //using for loop
     for(var i=0; i<collection.length; i++) {
       if (test(collection[i])) {
         result_array.push((collection[i]));
       }
     }
     return result_array;
-    
-   /*using underbar (incomplete trial)
-   var iterationInputs = [];
-
-    _.each(collection, function(value, index, collection) {
-          if test(value) {
-            iterationInputs.push([value, index, collection]);
-          }
-        });
-    return iterationInputs; */
+  */
   };
 
   // Return all elements of an array that don't pass a truth test.
@@ -108,7 +107,7 @@
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
 
-    return _.filter(collection, function(x) { return !test(x);});
+    return _.filter(collection, function(item) { return !test(item);});
 
 /*  
     //by negating filter logic
@@ -120,10 +119,10 @@
     }
     return result_array;
     
-    //using array difference underscore function
-    var filter_result = [];
+    //using array difference underscore function - not working
+     var filter_result = [];
     filter_result = _.filter(collection, test);
-    return (_.difference(collection, filter_result)); */
+    return _.difference(collection, filter_result); */
 
   };
 
@@ -131,12 +130,21 @@
   _.uniq = function(array) {
     
     var result = [];
-    for(var i=0; i<array.length; i++) {
-      if(!(array[i] in result)) {
-        result.push(array[i]);
+    _.each(array, function(item){
+      if(_.indexOf(result, item) == -1){
+        result.push(item);
       }
-    }
-  return result;
+    });
+    return result;
+    
+    /* //doesn't work with iterators!
+    var result = [];
+    _.each(array, function(item) {
+      if(!(item in result)) {
+        result.push(item);
+      }
+    });
+  return result; */
   };
 
 
@@ -145,8 +153,21 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var result = [];
+    if (Array.isArray(collection)) {
+      for (var i=0; i<collection.length; i++) {
+      var result_temp = iterator(collection[i], i, collection );
+      result.push(result_temp);
+      }
+    }
+    else {
+      for (var key in collection) {
+        var result_temp = iterator(collection[key], key, collection);
+        result.push(result_temp);
+      }
+    }
+    return result;
   };
-
   /*
    * TIP: map is really handy when you want to transform an array of
    * values into a new array of values. _.pluck() is solved for you
@@ -186,6 +207,20 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+  
+    if (arguments.length < 3) {
+      accumulator = collection[0];
+      collection.shift();
+      _.each(collection, function(item) {  
+        accumulator = iterator(accumulator, item);
+      });
+    }
+    else {
+      _.each(collection, function(item) {  
+        accumulator = iterator(accumulator, item);
+      });
+    }
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
